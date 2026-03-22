@@ -129,7 +129,7 @@ NFinger_CLI --update
 运行  NFinger_WEB
 ```
 
-🌐服务启动后，在浏览器中访问地址: `http://localhost:20000`
+🌐服务启动后，在浏览器中访问地址: `http://127.0.0.1:20000`
 
 ## **Ollama**本地大模型-🏠私有部署
 
