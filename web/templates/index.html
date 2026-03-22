@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFinger 溯纹 | AI 智能分析 Web应用指纹识别与资产发现</title>
+    <meta name="description" content="NFinger（溯纹）是一款基于AI智能分析的Web应用指纹识别工具，支持高精度CMS识别、框架检测、中间件指纹匹配。通过多维度特征分析，快速识别网站技术栈，助力安全审计、资产梳理和漏洞排查。开源、高效、可扩展。">
+    <meta name="keywords" content="Web指纹识别,NFinger,AI智能分析,溯纹指纹工具,网站技术栈识别,CMS识别,安全扫描工具,资产发现,漏洞排查,开源安全工具,Web应用安全,指纹库,中间件识别,框架检测">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+        }
+        
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .github-corner {
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+        
+        .github-link:hover .octo-arm {
+            animation: octocat-wave 560ms ease-in-out;
+        }
+        
+        @keyframes octocat-wave {
+            0%, 100% { transform: rotate(0); }
+            20%, 60% { transform: rotate(-25deg); }
+            40%, 80% { transform: rotate(10deg); }
+        }
+        
+        @media (max-width: 500px) {
+            .github-link:hover .octo-arm {
+                animation: none;
+            }
+            
+            .github-link .octo-arm {
+                animation: octocat-wave 560ms ease-in-out;
+            }
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+            font-family: monospace;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            background: #f9f9f9;
+            border-left: 4px solid #667eea;
+        }
+        
+        .result h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .result-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .result-item strong {
+            color: #667eea;
+        }
+        
+        .fingerprint-tag {
+            display: inline-block;
+            padding: 5px 15px;
+            margin: 5px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        
+        .status-success {
+            color: #28a745;
+        }
+        
+        .status-error {
+            color: #dc3545;
+        }
+        
+        .ai-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);
+            margin-top: 10px;
+            width: 100%;
+        }
+        
+        .ai-btn:hover {
+            box-shadow: 0 6px 20px rgba(240, 147, 251, 0.6);
+        }
+        
+        .disclaimer {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .disclaimer h3 {
+            color: #343a40;
+            margin-bottom: 15px;
+        }
+        
+        .disclaimer ul {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+        
+        .disclaimer li {
+            padding: 8px 0;
+            color: #495057;
+            line-height: 1.5;
+        }
+        
+        .disclaimer-toggle {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .disclaimer-toggle label {
+            font-size: 14px;
+            color: #6c757d;
+            cursor: pointer;
+        }
+        
+        .disclaimer-toggle input {
+            margin-right: 8px;
+        }
+        
+        .ai-config {
+            margin-top: 15px;
+        }
+        
+        .config-fields {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .config-fields input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .password-field {
+            position: relative;
+        }
+        
+        .password-field input {
+            width: 100%;
+            padding-right: 40px;
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        @media (min-width: 768px) {
+            .config-fields {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+        
+        .ai-analysis {
+            margin-top: 15px;
+            padding: 15px;
+            background: #fff5f8;
+            border-left: 4px solid #f093fb;
+            border-radius: 5px;
+        }
+        
+        .ai-analysis h4 {
+            color: #f093fb;
+            margin-bottom: 10px;
+        }
+        
+        .ai-analysis pre {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .batch-results {
+            margin-top: 20px;
+        }
+        
+        .batch-result {
+            margin-bottom: 15px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .batch-result h4 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .batch-result p {
+            margin-bottom: 8px;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .batch-result p strong {
+            color: #667eea;
+        }
+        
+        .contact-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+        
+        .contact-card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .contact-card p {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+        
+        .wechat-image {
+            max-width: 300px;
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .wechat-image:hover {
+            transform: scale(1.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="github-corner">
+            <a href="https://github.com/SecNN/NFinger" target="_blank" class="github-link">
+                <svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;">
+                    <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+                    <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+                    <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path>
+                </svg>
+            </a>
+        </div>
+        
+        <div class="header">
+            <h1>NFinger 溯纹 | AI 智能分析</h1>
+            <p>NFinger（溯纹）是一款基于AI智能分析的Web应用指纹识别工具，具备高效、可扩展的特性。它支持高精度CMS识别、框架检测及中间件指纹匹配，通过多维度特征分析，能够快速、精准地识别网站技术栈，有效助力安全审计、资产梳理与漏洞排查工作。</p>
+                
+        </div>
+
+    
+        
+        <div class="card">
+            <h2>指纹扫描</h2>
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('single')">🎯 单个目标</button>
+                <button class="tab" onclick="switchTab('batch')">🚀 批量扫描</button>
+                <button class="tab" onclick="switchTab('ai')">🤖 AI 智能分析</button>
+                <button class="tab" onclick="window.open('https://www.secnn.com/AiScan-N/', '_blank')">🛡️ AiScan-N    AI-Powered Security Tool</button>
+                <button class="tab" onclick="window.open('https://www.secnn.com/', '_blank')">🌐 SecNN</button>
+
+            </div>
+            
+            <div id="single-tab" class="tab-content active">
+                <div class="form-group">
+                    <label for="target">目标 URL</label>
+                    <input type="text" id="target" placeholder="http://example.com">
+                </div>
+                <button class="btn" onclick="scanSingle()">开始扫描</button>
+            </div>
+            
+            <div id="batch-tab" class="tab-content">
+                <div class="form-group">
+                    <label for="targets">目标 URL 列表（每行一个）</label>
+                    <textarea id="targets" placeholder="http://example.com&#10;https://test.com&#10;http://192.168.1.1:8080"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="threads">线程数</label>
+                    <input type="number" id="threads" value="10" min="1" max="50">
+                </div>
+                <button class="btn" onclick="scanBatch()">批量扫描</button>
+            </div>
+            
+            <div id="ai-tab" class="tab-content">
+                <div class="form-group">
+                    <label for="ai-target">目标 URL</label>
+                    <input type="text" id="ai-target" placeholder="http://example.com">
+                </div>
+                
+                <div class="form-group ai-config">
+                    <label>AI 大模型配置（可选，默认使用配置文件中的设置，兼容OpenAI接口【平台承诺不会存储任何大模型API KEY及相关数据】）:</label>
+                    <div class="config-fields">
+                        <input type="text" id="ai-base-url" placeholder="API 地址 (base_url)">
+                        <div class="password-field">
+                            <input type="password" id="ai-api-key" placeholder="API 密钥 (api_key)">
+                            <button type="button" class="toggle-password" onclick="togglePassword('ai-api-key')">👁️</button>
+                        </div>
+                        <input type="text" id="ai-model" placeholder="模型名称 (Model)">
+                    </div>
+                </div>
+                
+                <button class="btn ai-btn" onclick="aiScan()">🤖 AI 分析</button>
+            </div>
+            
+            <div class="disclaimer">
+                <h3>📋 使用声明</h3>
+                <ul>
+                    <li>✅ 本工具仅执行指纹识别，通过分析公开可访问的信息（如HTTP响应头、页面特征、数据库指纹等）识别技术栈</li>
+                    <li>❌ 本工具不会进行端口扫描、漏洞探测、暴力破解、DDoS攻击或任何可能影响目标系统正常运行的行为</li>
+                    <li>🔒 用户应仅对自己拥有合法权限的资产或已获得明确书面授权的目标使用本工具</li>
+                    <li>⚖️ 用户需自行承担使用本工具所产生的全部法律责任，开发者不对任何滥用行为负责</li>
+                </ul>
+                <div class="disclaimer-toggle">
+                    <input type="checkbox" id="hide-disclaimer">
+                    <label for="hide-disclaimer">不再显示此声明</label>
+                </div>
+            </div>
+            
+            <div id="result"></div>
+            
+        </div>
+        <div class="contact-card">
+            <h2>💬 沟通交流</h2>
+            <p>欢迎添加微信，技术交流，获取更多安全工具和技术分享</p>
+            <img src="wx.jpg" alt="微信联系方式" class="wechat-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <p style="display: none; color: #999; margin-top: 10px;">图片加载失败，请检查文件是否存在</p>
+        </div>
+    </div>
+
+    <script>
+        // 页面加载时检查是否需要显示声明
+        document.addEventListener('DOMContentLoaded', function() {
+            const disclaimer = document.querySelector('.disclaimer');
+            const hideDisclaimer = document.getElementById('hide-disclaimer');
+            
+            // 检查本地存储中是否有隐藏声明的设置
+            if (localStorage.getItem('hideDisclaimer') === 'true') {
+                disclaimer.style.display = 'none';
+                hideDisclaimer.checked = true;
+            }
+            
+            // 监听复选框变化
+            hideDisclaimer.addEventListener('change', function() {
+                localStorage.setItem('hideDisclaimer', this.checked);
+                if (this.checked) {
+                    disclaimer.style.display = 'none';
+                } else {
+                    disclaimer.style.display = 'block';
+                }
+            });
+        });
+        
+        function isValidUrlOrIp(input) {
+            // 验证IP地址格式
+            const ipPattern = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}(?::[0-9]+)?$/;
+            if (ipPattern.test(input)) {
+                return true;
+            }
+            
+            // 验证URL格式
+            try {
+                let url = input;
+                if (!/^https?:\/\//i.test(url)) {
+                    url = 'http://' + url;
+                }
+                const urlObj = new URL(url);
+                // 检查域名格式
+                const domainPattern = /^[a-zA-Z0-9][a-zA-Z0-9.-]*[a-zA-Z0-9]$/;
+                const netloc = urlObj.hostname;
+                return domainPattern.test(netloc);
+            } catch {
+                return false;
+            }
+        }
+        
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            document.querySelector(`.tab[onclick="switchTab('${tab}')"]`).classList.add('active');
+            document.getElementById(`${tab}-tab`).classList.add('active');
+            
+            document.getElementById('result').innerHTML = '';
+        }
+        
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const button = input.nextElementSibling;
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                button.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                button.textContent = '👁️';
+            }
+        }
+        
+        function showLoading() {
+            document.getElementById('result').innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>正在分析中，请耐心等待...</p>
+                </div>
+            `;
+        }
+        
+        async function scanSingle() {
+            const target = document.getElementById('target').value.trim();
+            
+            if (!target) {
+                alert('请输入目标 URL');
+                return;
+            }
+            
+            // 验证URL格式
+            if (!isValidUrlOrIp(target)) {
+                alert('请输入正确的域名URL或IP地址');
+                return;
+            }
+            
+            showLoading();
+            
+            try {
+                const response = await fetch('/api/scan', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ target }),
+                });
+                
+                const result = await response.json();
+                displayResult(result);
+            } catch (error) {
+                document.getElementById('result').innerHTML = `
+                    <div class="result">
+                        <h3 class="status-error">扫描失败</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        async function scanBatch() {
+            const targetsText = document.getElementById('targets').value.trim();
+            const threads = parseInt(document.getElementById('threads').value);
+            
+            if (!targetsText) {
+                alert('请输入目标 URL 列表');
+                return;
+            }
+            
+            const targets = targetsText.split('\n').map(t => t.trim()).filter(t => t);
+            
+            if (targets.length === 0) {
+                alert('请输入有效的目标 URL');
+                return;
+            }
+            
+            // 验证所有URL格式
+            const invalidTargets = [];
+            for (const target of targets) {
+                if (!isValidUrlOrIp(target)) {
+                    invalidTargets.push(target);
+                }
+            }
+            
+            if (invalidTargets.length > 0) {
+                alert(`以下URL格式无效: ${invalidTargets.join(', ')}`);
+                return;
+            }
+            
+            showLoading();
+            
+            try {
+                const response = await fetch('/api/batch_scan', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ targets, threads }),
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    document.getElementById('result').innerHTML = `
+                        <div class="result">
+                            <h3 class="status-error">批量扫描失败</h3>
+                            <p>${data.error}</p>
+                        </div>
+                    `;
+                } else {
+                    displayBatchResults(data.results);
+                }
+            } catch (error) {
+                document.getElementById('result').innerHTML = `
+                    <div class="result">
+                        <h3 class="status-error">批量扫描失败</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function displayResult(result) {
+            const statusClass = result.status === 'success' ? 'status-success' : 'status-error';
+            const statusText = result.status === 'success' ? '成功' : '失败';
+            
+            let fingerprintsHtml = '';
+            if (result.fingerprints && result.fingerprints.length > 0) {
+                fingerprintsHtml = result.fingerprints.map(f => 
+                    `<span class="fingerprint-tag">${f.name}</span>`
+                ).join('');
+            } else {
+                fingerprintsHtml = '<span style="color: #999;">未发现指纹</span>';
+            }
+            
+            let languagesHtml = '';
+            if (result.languages && result.languages.length > 0) {
+                languagesHtml = result.languages.join(', ');
+            } else {
+                languagesHtml = '未知';
+            }
+            
+            document.getElementById('result').innerHTML = `
+                <div class="result">
+                    <h3>扫描结果</h3>
+                    <div class="result-item">
+                        <strong>目标:</strong> ${result.target}
+                    </div>
+                    
+                    ${result.status === 'success' ? `
+                        <div class="result-item">
+                            <strong>网站标题:</strong> ${result.title || '未知'}
+                        </div>
+                        <div class="result-item">
+                            <strong>IP 地址:</strong> ${result.ip_address || '未知'}
+                        </div>
+                        <div class="result-item">
+                            <strong>IP 归属地:</strong> ${result.ip_location || '未知'}
+                        </div>
+                        <div class="result-item">
+                            <strong>服务器:</strong> ${result.server || '未知'}
+                        </div>
+                        <div class="result-item">
+                            <strong>开发语言:</strong> ${languagesHtml}
+                        </div>
+                        <div class="result-item">
+                            <strong>ICP 备案号:</strong> ${result.icp || '无'}
+                        </div>
+                        <div class="result-item">
+                            <strong>识别到的指纹:</strong><br>
+                            ${fingerprintsHtml}
+                        </div>
+                        ${result.favicon_hash ? `
+                            <div class="result-item">
+                                <strong>Favicon Hash:</strong> ${result.favicon_hash}
+                            </div>
+                        ` : ''}
+                        ${result.favicon_md5 ? `
+                            <div class="result-item">
+                                <strong>Favicon MD5:</strong> ${result.favicon_md5}
+                            </div>
+                        ` : ''}
+                        <div class="result-item">
+                            <button class="btn ai-btn" onclick="aiAnalyze()">🤖 AI 分析</button>
+                        </div>
+                        <div id="ai-analysis-result"></div>
+                    ` : `
+                        <div class="result-item">
+                            <strong>错误信息:</strong> ${result.message || '未知错误'}
+                        </div>
+                    `}
+                </div>
+            `;
+            
+            // 保存当前扫描结果，用于 AI 分析
+            window.currentScanResult = result;
+        }
+        
+        async function aiAnalyze() {
+            const resultDiv = document.getElementById('ai-analysis-result');
+            resultDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>AI 分析中...</p></div>';
+            
+            try {
+                // 获取 AI 配置参数
+                const aiConfig = {
+                    base_url: document.getElementById('ai-base-url').value.trim() || undefined,
+                    api_key: document.getElementById('ai-api-key').value.trim() || undefined,
+                    model: document.getElementById('ai-model').value.trim() || undefined
+                };
+                
+                const response = await fetch('/api/ai_analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        scan_result: window.currentScanResult,
+                        ai_config: aiConfig
+                    }),
+                });
+                
+                // 检查响应状态
+                if (!response.ok) {
+                    throw new Error(`服务器返回错误: ${response.status} ${response.statusText}`);
+                }
+                
+                // 尝试解析 JSON
+                let data;
+                try {
+                    data = await response.json();
+                } catch (jsonError) {
+                    // 如果解析失败，可能返回的是 HTML 错误页面或空响应
+                    throw new Error('服务器返回格式错误，请检查 AI 配置是否正确');
+                }
+                
+                if (data.error) {
+                    resultDiv.innerHTML = `
+                        <div class="result-item status-error">
+                            <strong>AI 分析失败:</strong> ${data.error}
+                        </div>
+                    `;
+                } else {
+                    // 去除 Markdown 格式符号
+                    const cleanAnalysis = data.analysis
+                        .replace(/#{1,6}\s+/g, '')           // 去除标题符号 #, ##, ### 等
+                        .replace(/\*\*\*/g, '')                 // 去除粗体符号 **
+                        .replace(/\*/g, '')                     // 去除斜体符号 *
+                        .replace(/---+/g, '')                    // 去除分隔线 ---
+                        .replace(/^-/gm, '')                    // 去除列表符号 - (行首)
+                        .replace(/^\d+\.\s+/gm, '')           // 去除有序列表 1. (行首)
+                        .replace(/^>\s+/gm, '')                 // 去除引用符号 > (行首)
+                        .replace(/`{1,3}/g, '')                 // 去除代码符号 `
+                        .replace(/\n{3,}/g, '\n\n')          // 合并多余的换行
+                        .trim();
+                    
+                    resultDiv.innerHTML = `
+                        <div class="result-item ai-analysis">
+                            <h4>🤖 AI 分析结果</h4>
+                            <pre>${cleanAnalysis}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result-item status-error">
+                        <strong>AI 分析失败:</strong> ${error.message}  
+                    </div>
+                `;
+            }
+        }
+        
+        async function aiScan() {
+            const target = document.getElementById('ai-target').value.trim();
+            
+            if (!target) {
+                alert('请输入目标 URL');
+                return;
+            }
+            
+            // 验证URL格式
+            if (!isValidUrlOrIp(target)) {
+                alert('请输入正确的域名URL或IP地址');
+                return;
+            }
+            
+            showLoading();
+            
+            try {
+                // 先进行扫描
+                const scanResponse = await fetch('/api/scan', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ target }),
+                });
+                
+                const scanResult = await scanResponse.json();
+                
+                if (scanResult.error) {
+                    document.getElementById('result').innerHTML = `
+                        <div class="result">
+                            <h3 class="status-error">扫描失败</h3>
+                            <p>${scanResult.error}</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // 保存当前扫描结果，用于 AI 分析
+                window.currentScanResult = scanResult;
+                
+                // 显示 AI 分析加载状态
+                document.getElementById('result').innerHTML = `
+                    <div class="ai-analysis">
+                        <h4>🤖 AI 分析中...</h4>
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>AI 正在分析技术栈，请耐心等待...</p>
+                        </div>
+                    </div>
+                `;
+                
+                // 获取 AI 配置参数
+                const aiConfig = {
+                    base_url: document.getElementById('ai-base-url').value.trim() || undefined,
+                    api_key: document.getElementById('ai-api-key').value.trim() || undefined,
+                    model: document.getElementById('ai-model').value.trim() || undefined
+                };
+                
+                // 进行 AI 分析
+                const aiResponse = await fetch('/api/ai_analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        scan_result: scanResult,
+                        ai_config: aiConfig
+                    }),
+                });
+                
+                // 检查响应状态
+                if (!aiResponse.ok) {
+                    throw new Error(`服务器返回错误: ${aiResponse.status} ${aiResponse.statusText}`);
+                }
+                
+                // 尝试解析 JSON
+                let aiData;
+                try {
+                    aiData = await aiResponse.json();
+                } catch (jsonError) {
+                    // 如果解析失败，可能返回的是 HTML 错误页面或空响应
+                    throw new Error('服务器返回格式错误，请检查 AI 配置是否正确');
+                }
+                
+                // 构建完整的 HTML：AI 分析结果 + 扫描结果
+                let aiHtml = '';
+                if (aiData.error) {
+                    aiHtml = `
+                        <div class="ai-analysis status-error">
+                            <h4>🤖 AI 分析失败</h4>     
+                            <p>${aiData.error}</p>
+                        </div>
+                    `;
+                } else {
+                    // 去除 Markdown 格式符号
+                    const cleanAnalysis = aiData.analysis
+                        .replace(/#{1,6}\s+/g, '')           // 去除标题符号 #, ##, ### 等
+                        .replace(/\*\*\*/g, '')                 // 去除粗体符号 **
+                        .replace(/\*/g, '')                     // 去除斜体符号 *
+                        .replace(/---+/g, '')                    // 去除分隔线 ---
+                        .replace(/^-/gm, '')                    // 去除列表符号 - (行首)
+                        .replace(/^\d+\.\s+/gm, '')           // 去除有序列表 1. (行首)
+                        .replace(/^>\s+/gm, '')                 // 去除引用符号 > (行首)
+                        .replace(/`{1,3}/g, '')                 // 去除代码符号 `
+                        .replace(/\n{3,}/g, '\n\n')          // 合并多余的换行
+                        .trim();
+                    
+                    aiHtml = `
+                        <div class="ai-analysis">
+                            <h4>🤖 AI 分析结果</h4>
+                            <pre>${cleanAnalysis}</pre>
+                        </div>
+                    `;
+                }
+                
+                // 构建扫描结果的 HTML
+                const statusClass = scanResult.status === 'success' ? 'status-success' : 'status-error';
+                const statusText = scanResult.status === 'success' ? '成功' : '失败';
+                
+                let fingerprintsHtml = '';
+                if (scanResult.fingerprints && scanResult.fingerprints.length > 0) {
+                    fingerprintsHtml = scanResult.fingerprints.map(f => 
+                        `<span class="fingerprint-tag">${f.name}</span>`
+                    ).join('');
+                } else {
+                    fingerprintsHtml = '<span style="color: #999;">未发现指纹</span>';
+                }
+                
+                let languagesHtml = '';
+                if (scanResult.languages && scanResult.languages.length > 0) {
+                    languagesHtml = scanResult.languages.join(', ');
+                } else {
+                    languagesHtml = '未知';
+                }
+                
+                let scanHtml = '';
+                if (scanResult.status === 'success') {
+                    scanHtml = `
+                        <div class="result">
+                            <h3>扫描结果</h3>
+                            <div class="result-item">
+                                <strong>目标:</strong> ${scanResult.target}
+                            </div>
+                            <div class="result-item">
+                                <strong>网站标题:</strong> ${scanResult.title || '未知'}
+                            </div>
+                            <div class="result-item">
+                                <strong>IP 地址:</strong> ${scanResult.ip_address || '未知'}
+                            </div>
+                            <div class="result-item">
+                                <strong>IP 归属地:</strong> ${scanResult.ip_location || '未知'}
+                            </div>
+                            <div class="result-item">
+                                <strong>服务器:</strong> ${scanResult.server || '未知'}
+                            </div>
+                            <div class="result-item">
+                                <strong>开发语言:</strong> ${languagesHtml}
+                            </div>
+                            <div class="result-item">
+                                <strong>ICP 备案号:</strong> ${scanResult.icp || '无'}
+                            </div>
+                            <div class="result-item">
+                                <strong>识别到的指纹:</strong><br>
+                                ${fingerprintsHtml}
+                            </div>
+                            ${scanResult.favicon_hash ? `
+                                <div class="result-item">
+                                    <strong>Favicon Hash:</strong> ${scanResult.favicon_hash}
+                                </div>
+                            ` : ''}
+                            ${scanResult.favicon_md5 ? `
+                                <div class="result-item">
+                                    <strong>Favicon MD5:</strong> ${scanResult.favicon_md5}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                } else {
+                    scanHtml = `
+                        <div class="result">
+                            <h3>扫描结果</h3>
+                            <div class="result-item">
+                                <strong>目标:</strong> ${scanResult.target}
+                            </div>
+                            <div class="result-item">
+                                <strong>状态:</strong> <span class="${statusClass}">${statusText}</span>
+                            </div>
+                            <div class="result-item">
+                                <strong>错误信息:</strong> ${scanResult.message || '未知错误'}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // 显示完整的结果：AI 分析结果在上方，扫描结果在下方
+                document.getElementById('result').innerHTML = aiHtml + scanHtml;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `
+                    <div class="result">
+                        <h3 class="status-error">扫描失败</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function displayBatchResults(results) {
+            let html = '<div class="batch-results"><h3>批量扫描结果</h3>';
+            
+            results.forEach(result => {
+                const statusClass = result.status === 'success' ? 'status-success' : 'status-error';
+                const statusText = result.status === 'success' ? '成功' : '失败';
+                
+                let fingerprintsHtml = '';
+                if (result.fingerprints && result.fingerprints.length > 0) {
+                    fingerprintsHtml = result.fingerprints.map(f => 
+                        `<span class="fingerprint-tag">${f.name}</span>`
+                    ).join('');
+                } else {
+                    fingerprintsHtml = '<span style="color: #999;">未发现指纹</span>';
+                }
+                
+                let languagesHtml = '';
+                if (result.languages && result.languages.length > 0) {
+                    languagesHtml = result.languages.join(', ');
+                } else {
+                    languagesHtml = '未知';
+                }
+                
+                html += `
+                    <div class="batch-result">
+                        <h4>${result.target}</h4>
+                        
+                        ${result.status === 'success' ? `
+                            <p><strong>标题:</strong> ${result.title || '未知'}</p>
+                            <p><strong>IP:</strong> ${result.ip_address || '未知'}</p>
+                            <p><strong>IP 归属地:</strong> ${result.ip_location || '未知'}</p>
+                            <p><strong>服务器:</strong> ${result.server || '未知'}</p>
+                            <p><strong>开发语言:</strong> ${languagesHtml}</p>
+                            <p><strong>ICP 备案号:</strong> ${result.icp || '无'}</p>
+                            <p><strong>指纹:</strong><br>${fingerprintsHtml}</p>
+                            ${result.favicon_hash ? `
+                                <p><strong>Favicon Hash:</strong> ${result.favicon_hash}</p>
+                            ` : ''}
+                            ${result.favicon_md5 ? `
+                                <p><strong>Favicon MD5:</strong> ${result.favicon_md5}</p>
+                            ` : ''}
+                        ` : `
+                            <p><strong>错误:</strong> ${result.message || '未知错误'}</p>
+                        `}
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            document.getElementById('result').innerHTML = html;
+        }
+    </script>
+</body>
+</html>
