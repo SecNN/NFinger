@@ -6,6 +6,8 @@
 
 在线使用：https://NFinger.SecNN.com
 
+Download：https://github.com/SecNN/NFinger/releases
+
 ```
  ██████   █████ ███████████  ███                                        
 ▒▒██████ ▒▒███ ▒▒███▒▒▒▒▒▒█ ▒▒▒                                         
